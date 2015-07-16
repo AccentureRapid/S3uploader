@@ -1,26 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.IO;
 
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Util;
 
 namespace S3uploader
 {
@@ -63,8 +50,8 @@ namespace S3uploader
 
   static class EnableUpload
   {
-    private static bool _gotBucket = false;
-    private static bool _gotFiles = false;
+    private static bool _gotBucket;
+    private static bool _gotFiles;
 
     public static bool BucketState(bool GotBucket)
     {
@@ -81,7 +68,7 @@ namespace S3uploader
   /// <summary>
   /// Interaction logic for MainWindow.xaml
   /// </summary>
-  public partial class MainWindow : Window
+  public partial class MainWindow
   {
     CancellationTokenSource cts;
     
@@ -281,7 +268,7 @@ namespace S3uploader
     {
       string pName = "Profile";
       string messageText = "AWS key";
-      MessageBoxResult result = MessageBox.Show(messageText, pName); 
+      MessageBox.Show(messageText, pName); 
     }
 
     private void ListProfiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -291,80 +278,6 @@ namespace S3uploader
       PopulateListBuckets();
       PopulateListRegions();
       ViewProfile.IsEnabled = true;
-    }
-
-    private async void ButtonUpload_Click(object sender, RoutedEventArgs e)
-    {
-      cts = new CancellationTokenSource();
-      FileListBox.SelectedItems.Clear();
-      while (FileListBox.Items.Count > 0)
-      {
-        //List<string> filePaths = new List<string>();
-        FileListBox.SelectedIndex = 0;
-        ButtonCancelUpload.IsEnabled = true;
-        UploadProgress.Visibility = Visibility.Visible;
-        UploadProgress.Value = 0;
-        string path = FileListBox.SelectedItem.ToString();
-        string extension = System.IO.Path.GetExtension(path);
-        string filename = System.IO.Path.GetFileName(path);
-        string contentType = AmazonS3Util.MimeTypeFromExtension(extension);
-        //cts = new CancellationTokenSource();
-        //filePaths.Add(fp.ToString());
-        FilePathTextBlock.Text = filename;
-
-        try
-        {
-          using (FileStream fs = File.OpenRead(path))
-          {
-            PutObjectRequest streamRequest = new PutObjectRequest()
-            {
-              BucketName = S3Client.BucketName,
-              Key = filename,
-              InputStream = fs
-            };
-            streamRequest.ContentType = contentType;
-            streamRequest.CannedACL = S3CannedACL.PublicRead;
-            streamRequest.ReadWriteTimeout = TimeSpan.FromHours(1);
-            streamRequest.StreamTransferProgress += OnUploadProgress;
-            await S3Client.Client.PutObjectAsync(streamRequest, cts.Token);
-            FileListBox.Items.Remove(FileListBox.SelectedItem);
-            //MessageBox.Show(filename + " uploaded");
-          }
-        }
-        catch (OperationCanceledException)
-        {
-          MessageBox.Show(filename + " Upload Cancelled");
-          break;
-        }
-        catch (AmazonS3Exception amazonS3Exception)
-        {
-          MessageBox.Show(amazonS3Exception.Message);
-          break;
-        }
-        catch (Exception)
-        {
-          MessageBox.Show("Other exception");
-          break;
-        }
-        finally
-        {
-          FilePathTextBlock.Text = "";
-          UploadProgress.Value = 0;
-          UploadProgress.Visibility = Visibility.Hidden;
-          ButtonCancelUpload.IsEnabled = false;
-        }
-      }
-    }
-
-    public void OnUploadProgress(object sender, StreamTransferProgressArgs args)
-    {
-      if (args.PercentDone >= 0 && args.PercentDone <= 100)
-      {
-        UploadProgress.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-        {
-          UploadProgress.Value = args.PercentDone;
-        }));
-      }
     }
 
     private void ListBuckets_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -377,12 +290,6 @@ namespace S3uploader
           ButtonUpload.IsEnabled = true;
         }
       }
-    }
-
-    private void ButtonCancelUpload_Click(object sender, RoutedEventArgs e)
-    {
-      if (cts != null)
-        cts.Cancel();
     }
 
     private void ListRegions_SelectionChanged(object sender, SelectionChangedEventArgs e)
