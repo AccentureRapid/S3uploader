@@ -262,6 +262,7 @@ namespace S3uploader
     {
       AddProfile AddNewProfile = new AddProfile();
       AddNewProfile.ShowDialog();
+      PopulateListProfiles();
     }
 
     private void ViewProfile_Click(object sender, RoutedEventArgs e)

@@ -37,6 +37,12 @@
     <Reference Include="AWSSDK">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.dll</HintPath>
     </Reference>
+    <Reference Include="AWSSDK.Core">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.S3">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.S3.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
